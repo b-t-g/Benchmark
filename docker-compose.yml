@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  db:
+    image: timescale/timescaledb-ha:pg14-latest
+    restart: always
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+    - 8080:8080
+
+  db-migrations:
+    build:
+      dockerfile: Dockerfile.migrations
+    depends_on:
+    - db
+    command:
+      ./scripts/import_data.sh
+
+  cli:
+    build:
+      dockerfile: Dockerfile
+    depends_on:
+    - db-migrations
+    environment:
+      DB_HOSTNAME: "db"
+    command:
+      ./benchmark --migrations ./cpu_usage/cpu_usage.sql --data ./cpu_usage/cpu_usage.csv --number-of-workers 4

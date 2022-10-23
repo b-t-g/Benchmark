@@ -5,16 +5,23 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	pgx "github.com/jackc/pgx/v4"
 )
 
 const (
-	username = "postgres"
-	password = "example"
-	port     = 5432
-	database = "postgres"
-	sslmode  = "disable"
+	username    = "postgres"
+	password    = "example"
+	port        = 5432
+	database    = "homework"
+	sslmode     = "disable"
+	sampleQuery = `
+select time_bucket('1 minute', ts) as one_min, min(usage), max(usage) from cpu_usage
+where host = 'host_000000'
+group by one_min   
+order by one_min desc limit 5;
+`
 )
 
 func RunQuery(goRoutineNumber int, query string) {
@@ -39,5 +46,20 @@ func RunQuery(goRoutineNumber int, query string) {
 	}
 	defer conn.Close(ctx)
 
-	fmt.Printf("%d finished!", goRoutineNumber)
+	fmt.Println(goRoutineNumber)
+
+	var queryStats QueryResult
+	err = conn.QueryRow(ctx, sampleQuery).Scan(&queryStats.interval, &queryStats.min, &queryStats.max)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("%v", queryStats)
+}
+
+type QueryResult struct {
+	min float64
+	max float64
+	interval time.Time
 }

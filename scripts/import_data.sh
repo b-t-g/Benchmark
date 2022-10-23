@@ -23,7 +23,6 @@ data_exists() {
 	if psql "postgres://${USERNAME}:${PASSWORD}@${DB_HOSTNAME}:${PORT}?sslmode=${SSL_MODE}" -lqt | cut -d \| -f 1 | grep -qw "homework"; then
 		return 0
 	else
-		echo "$contains_homework"
 		return 1
 	fi
 }

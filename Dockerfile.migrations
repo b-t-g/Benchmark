@@ -1,0 +1,8 @@
+FROM alpine:3.16.2
+
+RUN mkdir /migrations
+ADD ./scripts/ /migrations/scripts
+ADD ./cpu_usage/ /migrations/cpu_usage
+WORKDIR /migrations
+RUN apk add bash postgresql-client
+CMD ["./scripts/import_data.sh"]

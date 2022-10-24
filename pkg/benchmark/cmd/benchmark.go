@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/b-t-g/benchmark/pkg/benchmark/query"
 	"github.com/spf13/cobra"
@@ -42,6 +43,10 @@ func benchmark(cmd *cobra.Command, args []string) {
 	for scanner.Scan() {
 		// Just get the last host for now
 		text = scanner.Text()
+		if strings.Split(text, ",")[0] == "hostname" {
+			continue
+		}
+		validateString(text)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -65,6 +70,24 @@ func benchmark(cmd *cobra.Command, args []string) {
 	wg.Wait()
 	fmt.Println("Done")
 	os.Exit(0)
+}
+
+func validateString(row string) error {
+	fields := strings.Split(row, ",")
+	layout := "2006-02-01 15:04:05"
+	_, err := time.Parse(layout, fields[1])
+	if err != nil {
+		fmt.Printf("Error parsing timestamp %s\nIn row %s\n", fields[1], row)
+		return err
+	}
+
+	_, err = time.Parse(layout, fields[2])
+	if err != nil {
+		fmt.Printf("Error parsing timestamp %s\nIn row %s\n", fields[2], row)
+		return err
+	}
+
+	return nil
 }
 
 func formatQueryString(host, startTime, endTime string) string {

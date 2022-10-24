@@ -16,12 +16,6 @@ const (
 	port        = 5432
 	database    = "homework"
 	sslmode     = "disable"
-	sampleQuery = `
-select time_bucket('1 minute', ts) as one_min, min(usage), max(usage) from cpu_usage
-where host = 'host_000000'
-group by one_min   
-order by one_min desc limit 5;
-`
 )
 
 func RunQuery(goRoutineNumber int, query string) {

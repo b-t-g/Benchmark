@@ -43,7 +43,7 @@ func RunQuery(goRoutineNumber int, query string) {
 	fmt.Println(goRoutineNumber)
 
 	var queryStats QueryResult
-	err = conn.QueryRow(ctx, sampleQuery).Scan(&queryStats.interval, &queryStats.min, &queryStats.max)
+	err = conn.QueryRow(ctx, query).Scan(&queryStats.interval, &queryStats.min, &queryStats.max)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		os.Exit(1)

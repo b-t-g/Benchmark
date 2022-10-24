@@ -12,16 +12,15 @@ import (
 )
 
 const (
-	username       = "postgres"
-	password       = "example"
-	port           = 5432
-	database       = "postgres"
-	sslmode        = "disable"
-	sampleQueryFmt = `
-select time_bucket('1 minute', ts) as one_min, min(usage), max(usage) from cpu_usage
-where host = '%s'
-group by one_min   
-order by one_min desc limit 5;
+	username = "postgres"
+	password = "example"
+	port     = 5432
+	database = "postgres"
+	sslmode  = "disable"
+	queryFmt = `
+select time_bucket('1 minute', ts, '%s seconds'::INTERVAL) as one_min, min(usage), max(usage) from cpu_usage
+where host = '%s' and ts >= '%s' and ts <= '%s' 
+group by one_min ;
 `
 )
 
@@ -51,7 +50,7 @@ func benchmark(cmd *cobra.Command, args []string) {
 	}
 
 	host := strings.Split(text, ",")[0]
-	queryString := fmt.Sprintf(sampleQueryFmt, host)
+	queryString := formatQueryString(host, "2017-01-01 08:59:22", "2017-01-01 10:00:22")
 
 	wg := new(sync.WaitGroup)
 	for i := 0; i < NumWorkers; i++ {
@@ -65,4 +64,11 @@ func benchmark(cmd *cobra.Command, args []string) {
 
 	wg.Wait()
 	fmt.Println("Done")
+	os.Exit(0)
+}
+
+func formatQueryString(host, startTime, endTime string) string {
+	splitStartTime := strings.Split(startTime, ":")
+	seconds := splitStartTime[len(splitStartTime) - 1]
+	return fmt.Sprintf(queryFmt, seconds, host, startTime, endTime)
 }

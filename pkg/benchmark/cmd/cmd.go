@@ -8,8 +8,7 @@ import (
 )
 
 var NumWorkers int
-var MigrationsPath string
-var DataPath string
+var QueryParamsPath string
 
 var benchmarkCmd = &cobra.Command{
 	Use:   "benchmark",
@@ -20,8 +19,7 @@ var benchmarkCmd = &cobra.Command{
 
 func init() {
 	benchmarkCmd.PersistentFlags().IntVarP(&NumWorkers, "number-of-workers", "n", 4, "Number of concurrent workers for processing queries")
-	benchmarkCmd.PersistentFlags().StringVarP(&MigrationsPath, "migrations", "m", "", "If present, file from which to run migrations. Run no migrations if omitted")
-	benchmarkCmd.PersistentFlags().StringVarP(&DataPath, "data", "d", "", "If present, file from which to import data. Run no migrations if omitted")
+	benchmarkCmd.PersistentFlags().StringVarP(&QueryParamsPath, "query-params", "q", "", "Required: File from which to read to generate queries.")
 
 }
 

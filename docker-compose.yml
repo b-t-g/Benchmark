@@ -31,4 +31,4 @@ services:
     environment:
       DB_HOSTNAME: "db"
     command:
-      ./benchmark --migrations ./cpu_usage/cpu_usage.sql --data ./cpu_usage/cpu_usage.csv --number-of-workers 4
+      ./benchmark --number-of-workers 4 --query-params ./cpu_usage/query_params.csv

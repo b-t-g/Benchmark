@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	username    = "postgres"
-	password    = "example"
-	port        = 5432
-	database    = "homework"
-	sslmode     = "disable"
+	username = "postgres"
+	password = "example"
+	port     = 5432
+	database = "homework"
+	sslmode  = "disable"
 )
 
 func RunQuery(goRoutineNumber int, query string) {

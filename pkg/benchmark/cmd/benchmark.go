@@ -54,7 +54,6 @@ func benchmark(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 	// determined to be valid
 	host := strings.Split(text, ",")[0]
 	startTime := strings.Split(text, ",")[1]
@@ -84,10 +83,14 @@ func benchmark(cmd *cobra.Command, args []string) {
 			queryStatistics.Durations = append(queryStatistics.Durations, localQueryStatistics.Durations...)
 			wg.Done()
 		}()
+
 	}
 
 	wg.Wait()
-	fmt.Println("Done")
+
+	fmt.Printf("Done\n")
+	fmt.Printf("%v\n", queryStatistics)
+	fmt.Printf("%v\n", statistics.ProcessQueryStatistics(queryStatistics))
 	os.Exit(0)
 }
 

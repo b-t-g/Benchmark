@@ -54,8 +54,11 @@ func benchmark(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	// determined to be valid
 	host := strings.Split(text, ",")[0]
-	queryString := formatQueryString(host, "2017-01-01 08:59:22", "2017-01-01 10:00:22")
+	startTime := strings.Split(text, ",")[1]
+	endTime := strings.Split(text, ",")[2]
+	queryString := formatQueryString(host, startTime, endTime)
 
 	wg := new(sync.WaitGroup)
 	for i := 0; i < NumWorkers; i++ {

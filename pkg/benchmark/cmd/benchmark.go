@@ -135,10 +135,31 @@ func benchmark(cmd *cobra.Command, args []string) {
 
 	wg.Wait()
 
-	fmt.Printf("Done\n")
-	fmt.Printf("%v\n", queryStatistics)
-	fmt.Printf("%v\n", statistics.ProcessQueryStatistics(queryStatistics))
+	processedStatistics := statistics.ProcessQueryStatistics(queryStatistics)
+    fmt.Printf("%s", formatOutput(processedStatistics))
 	os.Exit(0)
+}
+
+func formatOutput(processedStatistics statistics.ProcessedStatistics) string {
+	return fmt.Sprintf(`
+Min Query Time: %d ms
+Query with Min Time: %s
+
+Max Query Time: %d ms
+Query With Max Time: %s
+
+Average Query Time: %f ms
+
+Median Query Time: %f ms
+
+Standard Deviation in Query Time: %f ms
+`, processedStatistics.Min.QueryMsDuration,
+	processedStatistics.Min.Query,
+		processedStatistics.Max.QueryMsDuration,
+		processedStatistics.Max.Query,
+		processedStatistics.Average,
+		processedStatistics.Median,
+	processedStatistics.StdDev)
 }
 
 func validateRow(row string) error {

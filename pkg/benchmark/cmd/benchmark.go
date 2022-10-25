@@ -84,8 +84,11 @@ func benchmark(cmd *cobra.Command, args []string) {
 	for i := 0; i < NumWorkers; i++ {
 		wg.Add(1)
 		var localQueryStatistics statistics.Statistics
+
+		// asynchronous functions work oddly with loop variables
+		j := i
 		go func() {
-			localQueryStatistics = query.RunQuery(queryString)
+			localQueryStatistics = query.RunQuery(threadsToQueries[j])
 
 			queryStatisticsMutex.Lock()
 			defer queryStatisticsMutex.Unlock()

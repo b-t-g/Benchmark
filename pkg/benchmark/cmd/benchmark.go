@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/b-t-g/benchmark/pkg/benchmark/query"
+	"github.com/b-t-g/benchmark/pkg/benchmark/statistics"
 	"github.com/spf13/cobra"
 )
 
@@ -61,11 +62,26 @@ func benchmark(cmd *cobra.Command, args []string) {
 	queryString := formatQueryString(host, startTime, endTime)
 
 	wg := new(sync.WaitGroup)
+	queryStatistics := statistics.Statistics{}
+	queryStatisticsMutex := sync.Mutex{}
 	for i := 0; i < NumWorkers; i++ {
 		wg.Add(1)
-		j := i
+		var localQueryStatistics statistics.Statistics
 		go func() {
-			query.RunQuery(j, queryString)
+			localQueryStatistics = query.RunQuery(queryString)
+
+			queryStatisticsMutex.Lock()
+			defer queryStatisticsMutex.Unlock()
+
+			if localQueryStatistics.Min.QueryMsDuration < queryStatistics.Min.QueryMsDuration || queryStatistics.Min.QueryMsDuration == 0 {
+				queryStatistics.Min = localQueryStatistics.Min
+			}
+
+			if localQueryStatistics.Max.QueryMsDuration > queryStatistics.Max.QueryMsDuration {
+				queryStatistics.Max = localQueryStatistics.Max
+			}
+
+			queryStatistics.Durations = append(queryStatistics.Durations, localQueryStatistics.Durations...)
 			wg.Done()
 		}()
 	}

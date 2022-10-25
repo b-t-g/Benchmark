@@ -39,6 +39,7 @@ func RunQuery(query string) statistics.Statistics {
 		os.Exit(1)
 	}
 	defer conn.Close(ctx)
+	stats := statistics.Statistics{}
 
 	queryStart := time.Now()
 	_, err = conn.Query(ctx, query)
@@ -49,7 +50,6 @@ func RunQuery(query string) statistics.Statistics {
 	queryEnd := time.Now()
 	queryDuration := queryEnd.Sub(queryStart).Milliseconds()
 
-	stats := statistics.Statistics{}
 	stats.Durations = append(stats.Durations, queryDuration)
 	if queryDuration < stats.Min.QueryMsDuration || stats.Min.QueryMsDuration == 0 {
 		stats.Min = statistics.QueryStatistic{QueryMsDuration: queryDuration, Query: query}

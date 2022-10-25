@@ -41,9 +41,12 @@ func benchmark(cmd *cobra.Command, args []string) {
 	scanner := bufio.NewScanner(file)
 
 	var text string
-	threadsToQueries := [][]string{}
+	threadsToQueries := make([][]string, NumWorkers)
+	for i := 0; i < NumWorkers; i++ {
+		threadsToQueries[i] = []string{}
+	}
 
-	hostToThread := map[string]int
+	hostToThread := map[string]int{}
 
 	// Assign queries to threads in a round robin fashion
 	threadScheduler := 0
@@ -69,8 +72,7 @@ func benchmark(cmd *cobra.Command, args []string) {
 			threadScheduler = (threadScheduler + 1) % NumWorkers
 		}
 
-		queriesForCurrentThread := threadsToQueries[thread]
-		queriesForCurrentThread = append(queriesForCurrentThread, formatQueryString(host, startTime, endTime))
+		threadsToQueries[thread] = append(threadsToQueries[thread], formatQueryString(host, startTime, endTime))
 	}
 
 	if err := scanner.Err(); err != nil {

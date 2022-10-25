@@ -3,7 +3,12 @@ package statistics
 import "time"
 
 type Statistics struct {
-	min       time.Duration
-	max       time.Duration
-	durations []time.Duration
+	Min       QueryStatistic
+	Max       QueryStatistic
+	Durations []int64
+}
+
+type QueryStatistic struct {
+	QueryMsDuration int64
+	Query           string
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/b-t-g/benchmark/pkg/benchmark/statistics"
 	pgx "github.com/jackc/pgx/v4"
 )
 
@@ -18,7 +19,7 @@ const (
 	sslmode  = "disable"
 )
 
-func RunQuery(goRoutineNumber int, query string) {
+func RunQuery(query string) statistics.Statistics {
 	hostname := os.Getenv("DB_HOSTNAME")
 	if hostname == "" {
 		log.Fatal("DB_HOSTNAME for declaring the DB hostname is empty!")
@@ -36,24 +37,27 @@ func RunQuery(goRoutineNumber int, query string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
-		return
 	}
 	defer conn.Close(ctx)
 
-	fmt.Println(goRoutineNumber)
-
-	var queryStats QueryResult
-	err = conn.QueryRow(ctx, query).Scan(&queryStats.interval, &queryStats.min, &queryStats.max)
+	queryStart := time.Now()
+	_, err = conn.Query(ctx, query)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		os.Exit(1)
 	}
+	queryEnd := time.Now()
+	queryDuration := queryEnd.Sub(queryStart).Milliseconds()
 
-	fmt.Printf("%v", queryStats)
-}
+	stats := statistics.Statistics{}
+	stats.Durations = append(stats.Durations, queryDuration)
+	if queryDuration < stats.Min.QueryMsDuration || stats.Min.QueryMsDuration == 0 {
+		stats.Min = statistics.QueryStatistic{QueryMsDuration: queryDuration, Query: query}
+	}
 
-type QueryResult struct {
-	min float64
-	max float64
-	interval time.Time
+	if queryDuration > stats.Max.QueryMsDuration {
+		stats.Max = statistics.QueryStatistic{QueryMsDuration: queryDuration, Query: query}
+	}
+
+	return stats
 }

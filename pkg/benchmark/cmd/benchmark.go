@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/b-t-g/benchmark/pkg/benchmark/query"
 	"github.com/b-t-g/benchmark/pkg/benchmark/statistics"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +20,9 @@ const (
 	username = "postgres"
 	password = "example"
 	port     = 5432
-	database = "postgres"
+	database = "homework"
 	sslmode  = "disable"
+
 	queryFmt = `
 select time_bucket('1 minute', ts, '%s seconds'::INTERVAL) as one_min, min(usage), max(usage) from cpu_usage
 where host = '%s' and ts >= '%s' and ts <= '%s' 
@@ -80,6 +84,26 @@ func benchmark(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	hostname := os.Getenv("DB_HOSTNAME")
+	if hostname == "" {
+		log.Fatal("DB_HOSTNAME for declaring the DB hostname is empty!")
+	}
+
+	// In a Kubernetes environment, instead of hard-coding, I'd create a Kubernetes
+	// secret and, in both the stateful set for the database (if it's deployed myself)
+	// and the deployment for this benchmark tool, I'd use the secret as an environment
+	// variable as shown here:
+	// https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		username, password, hostname, port, database, sslmode)
+	ctx := context.Background()
+	pool, err := pgxpool.Connect(ctx, connStr)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+
 	wg := new(sync.WaitGroup)
 	queryStatistics := statistics.Statistics{}
 	queryStatisticsMutex := sync.Mutex{}
@@ -90,7 +114,7 @@ func benchmark(cmd *cobra.Command, args []string) {
 		// asynchronous functions work oddly with loop variables
 		j := i
 		go func() {
-			localQueryStatistics = query.RunQuery(threadsToQueries[j])
+			localQueryStatistics = query.RunQuery(threadsToQueries[j], pool)
 
 			queryStatisticsMutex.Lock()
 			defer queryStatisticsMutex.Unlock()

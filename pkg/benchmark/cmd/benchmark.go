@@ -46,7 +46,7 @@ func benchmark(cmd *cobra.Command, args []string) {
 		if strings.Split(text, ",")[0] == "hostname" {
 			continue
 		}
-		validateString(text)
+		validateRow(text)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -72,7 +72,7 @@ func benchmark(cmd *cobra.Command, args []string) {
 	os.Exit(0)
 }
 
-func validateString(row string) error {
+func validateRow(row string) error {
 	fields := strings.Split(row, ",")
 	layout := "2006-02-01 15:04:05"
 	_, err := time.Parse(layout, fields[1])

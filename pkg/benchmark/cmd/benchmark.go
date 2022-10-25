@@ -111,6 +111,6 @@ func validateRow(row string) error {
 
 func formatQueryString(host, startTime, endTime string) string {
 	splitStartTime := strings.Split(startTime, ":")
-	seconds := splitStartTime[len(splitStartTime) - 1]
+	seconds := splitStartTime[len(splitStartTime)-1]
 	return fmt.Sprintf(queryFmt, seconds, host, startTime, endTime)
 }

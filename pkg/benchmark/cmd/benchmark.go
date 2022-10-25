@@ -41,24 +41,42 @@ func benchmark(cmd *cobra.Command, args []string) {
 	scanner := bufio.NewScanner(file)
 
 	var text string
+	threadsToQueries := [][]string{}
+
+	hostToThread := map[string]int
+
+	// Assign queries to threads in a round robin fashion
+	threadScheduler := 0
+
+	// Skip the first line defining columns
+	scanner.Scan()
+
 	for scanner.Scan() {
-		// Just get the last host for now
 		text = scanner.Text()
-		if strings.Split(text, ",")[0] == "hostname" {
+		if err = validateRow(text); err != nil {
+			fmt.Printf("Skipping row %s for reason %v\n", text, err)
 			continue
 		}
-		validateRow(text)
+
+		host := strings.Split(text, ",")[0]
+		startTime := strings.Split(text, ",")[1]
+		endTime := strings.Split(text, ",")[2]
+		var thread int
+		if k, found := hostToThread[host]; found {
+			thread = k
+		} else {
+			thread = threadScheduler
+			threadScheduler = (threadScheduler + 1) % NumWorkers
+		}
+
+		queriesForCurrentThread := threadsToQueries[thread]
+		queriesForCurrentThread = append(queriesForCurrentThread, formatQueryString(host, startTime, endTime))
 	}
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	// determined to be valid
-	host := strings.Split(text, ",")[0]
-	startTime := strings.Split(text, ",")[1]
-	endTime := strings.Split(text, ",")[2]
-	queryString := formatQueryString(host, startTime, endTime)
 
 	wg := new(sync.WaitGroup)
 	queryStatistics := statistics.Statistics{}

@@ -71,6 +71,9 @@ func average(durations []int64) float64 {
 //     from the heap), we could calculate the average at the same time. This would not lead to a runtime improvement in terms
 //     of computational complexity, but could be an appreciable improvement to a user when there are a sufficiently large number
 //     of queries.
+//
+// Given that I'd expect the runtime to be dominated by the network latency of the queries in most cases, I felt that
+// a simpler to understand approach for computing the median, though with worse runtime complexity, was the correct tradeoff.
 func median(durations []int64) float64 {
 	sort.Slice(durations, func(i, j int) bool {
 		return durations[i] < durations[j]

@@ -173,17 +173,26 @@ Standard Deviation in Query Time: %f ms
 
 func ValidateRow(row string) error {
 	fields := strings.Split(row, ",")
+	if len(fields) != 3 {
+		fmt.Printf("More than three fields found in row %s", row)
+		return fmt.Errorf("Invalid number of fields")
+	}
 	layout := "2006-02-01 15:04:05"
-	_, err := time.Parse(layout, fields[1])
+	startTime, err := time.Parse(layout, fields[1])
 	if err != nil {
 		fmt.Printf("Error parsing timestamp %s\nIn row %s\n", fields[1], row)
 		return err
 	}
 
-	_, err = time.Parse(layout, fields[2])
+	endTime, err := time.Parse(layout, fields[2])
 	if err != nil {
 		fmt.Printf("Error parsing timestamp %s\nIn row %s\n", fields[2], row)
 		return err
+	}
+
+	if endTime.Before(startTime) {
+		fmt.Printf("In row %s, end time is before start time\n", row)
+		return fmt.Errorf("End time before start time")
 	}
 
 	return nil

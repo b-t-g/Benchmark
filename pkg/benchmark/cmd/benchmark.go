@@ -54,16 +54,18 @@ func benchmark(cmd *cobra.Command, args []string) {
 
 	// Assign queries to threads in a round robin fashion
 	threadScheduler := 0
+	totalQueries := 0
 
 	// Skip the first line defining columns
 	scanner.Scan()
 
 	for scanner.Scan() {
 		text = scanner.Text()
-		if err = validateRow(text); err != nil {
+		if err = ValidateRow(text); err != nil {
 			fmt.Printf("Skipping row %s for reason %v\n", text, err)
 			continue
 		}
+		totalQueries += 1
 
 		host := strings.Split(text, ",")[0]
 		startTime := strings.Split(text, ",")[1]
@@ -107,12 +109,14 @@ func benchmark(cmd *cobra.Command, args []string) {
 	wg := new(sync.WaitGroup)
 	queryStatistics := statistics.Statistics{}
 	queryStatisticsMutex := sync.Mutex{}
+	var processStartTime time.Time
 	for i := 0; i < NumWorkers; i++ {
 		wg.Add(1)
 		var localQueryStatistics statistics.Statistics
 
 		// asynchronous functions work oddly with loop variables
 		j := i
+		processStartTime = time.Now()
 		go func() {
 			localQueryStatistics = query.RunQuery(threadsToQueries[j], pool)
 
@@ -134,14 +138,19 @@ func benchmark(cmd *cobra.Command, args []string) {
 	}
 
 	wg.Wait()
+	processEndTime := time.Now()
+	processingTime := processEndTime.Sub(processStartTime).Milliseconds()
 
 	processedStatistics := statistics.ProcessQueryStatistics(queryStatistics)
-    fmt.Printf("%s", formatOutput(processedStatistics))
+	fmt.Printf("%s", formatOutput(processedStatistics, processingTime, totalQueries))
 	os.Exit(0)
 }
 
-func formatOutput(processedStatistics statistics.ProcessedStatistics) string {
+func formatOutput(processedStatistics statistics.ProcessedStatistics, processingTime int64, totalQueries int) string {
 	return fmt.Sprintf(`
+Total Processing Time: %d ms
+Total Queries Processed: %d
+
 Min Query Time: %d ms
 Query with Min Time: %s
 
@@ -153,13 +162,15 @@ Average Query Time: %f ms
 Median Query Time: %f ms
 
 Standard Deviation in Query Time: %f ms
-`, processedStatistics.Min.QueryMsDuration,
-	processedStatistics.Min.Query,
+`, processingTime,
+		totalQueries,
+		processedStatistics.Min.QueryMsDuration,
+		processedStatistics.Min.Query,
 		processedStatistics.Max.QueryMsDuration,
 		processedStatistics.Max.Query,
 		processedStatistics.Average,
 		processedStatistics.Median,
-	processedStatistics.StdDev)
+		processedStatistics.StdDev)
 }
 
 func validateRow(row string) error {

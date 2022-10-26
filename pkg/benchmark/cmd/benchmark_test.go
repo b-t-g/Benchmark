@@ -36,5 +36,9 @@ var _ = Describe("Benchmark", func() {
 			err := cmd.ValidateRow("2017-01-01 08:59:22,2017-01-01 09:59:22")
 			Expect(err).To(HaveOccurred())
 		})
+		It("fails to validate a with the columns in the wrong order", func() {
+			err := cmd.ValidateRow("2017-01-01 08:59:22, host_000008,2017-01-01 09:59:22")
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })

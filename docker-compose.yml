@@ -29,6 +29,6 @@ services:
     depends_on:
     - db-migrations
     environment:
-      DB_HOSTNAME: "db"
+      TIMESCALE_CONNECTION_STRING: "postgres://postgres:example@db:5432/homework?sslmode=disable"
     command:
       ./benchmark --number-of-workers 4 --query-params ./cpu_usage/query_params.csv

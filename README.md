@@ -6,8 +6,8 @@ The project should run simply with `docker-compose up --build` on the first run 
 For running just the CLI (independently of Docker Compose), there is an environment variable called `TIMESCALE_CONNECTION_STRING` which, if present, the program will use as the connection string by which to connect to the database. If not, the program will use a pre-defined connection string (and will log this to the database).
 
 The required flags are:
-1. `--query-params` or `-q` which specifies the file from which to generate queries.
-2. `--number-of-workers` or `-n` which specifies the number of worker threads to use.
+1. `--query-params` or `-q` a required flag which specifies the file from which to generate queries.
+2. `--number-of-workers` or `-n` an optional flag which specifies the number of worker threads to use, defaults to 4 workers.
 
 ## Tradeoffs
 ### Computational and Space Complexity

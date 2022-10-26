@@ -31,4 +31,4 @@ services:
     environment:
       TIMESCALE_CONNECTION_STRING: "postgres://postgres:example@db:5432/homework?sslmode=disable"
     command:
-      ./benchmark --number-of-workers 4 --query-params ./cpu_usage/query_params.csv
+      ./benchmark --number-of-workers 8 --query-params ./cpu_usage/query_params.csv

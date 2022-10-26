@@ -16,6 +16,9 @@ var _ = Describe("Statistics", func() {
 			stats.Min = statistics.QueryStatistic{QueryMsDuration: 1}
 			stats.Max = statistics.QueryStatistic{QueryMsDuration: 5}
 			stats.Durations = []int64{1, 2, 3, 4, 5}
+			for _, i := range stats.Durations {
+				stats.SumOfDurations += i
+			}
 		})
 		It("calculates statistics correctly", func() {
 			p := statistics.ProcessQueryStatistics(stats)

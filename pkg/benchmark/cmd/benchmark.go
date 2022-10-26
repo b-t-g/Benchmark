@@ -129,6 +129,7 @@ func benchmark(cmd *cobra.Command, args []string) {
 			}
 
 			queryStatistics.Durations = append(queryStatistics.Durations, localQueryStatistics.Durations...)
+			queryStatistics.SumOfDurations += localQueryStatistics.SumOfDurations
 			wg.Done()
 		}()
 

@@ -32,6 +32,7 @@ func RunQuery(queries []string, pool *pgxpool.Pool) statistics.Statistics {
 
 		queryEnd := time.Now()
 		queryDuration := queryEnd.Sub(queryStart).Milliseconds()
+		stats.SumOfDurations += queryDuration
 
 		conn.Release()
 

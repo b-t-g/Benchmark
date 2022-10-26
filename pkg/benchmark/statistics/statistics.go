@@ -6,9 +6,10 @@ import (
 )
 
 type Statistics struct {
-	Min       QueryStatistic
-	Max       QueryStatistic
-	Durations []int64
+	Min            QueryStatistic
+	Max            QueryStatistic
+	SumOfDurations int64
+	Durations      []int64
 }
 
 type QueryStatistic struct {
@@ -32,7 +33,7 @@ type ProcessedStatistics struct {
 func ProcessQueryStatistics(stats Statistics) ProcessedStatistics {
 	r := ProcessedStatistics{}
 	r.Median = median(stats.Durations)
-	r.Average = average(stats.Durations)
+	r.Average = average(stats.SumOfDurations, len(stats.Durations))
 	r.StdDev = standardDeviation(stats.Durations, r.Average)
 	r.Min = stats.Min
 	r.Max = stats.Max
@@ -51,13 +52,8 @@ func standardDeviation(durations []int64, avg float64) float64 {
 	return math.Sqrt(sd / (float64(len(durations))))
 }
 
-func average(durations []int64) float64 {
-	avg := int64(0)
-	for _, i := range durations {
-		avg += i
-	}
-
-	return float64(avg) / float64(len(durations))
+func average(sumOfDurations int64, lenDurations int) float64 {
+	return float64(sumOfDurations) / float64(lenDurations)
 }
 
 // This is the simplest approach, and hence easiest to understand/change, but, in terms of time complexity, is not optimal.

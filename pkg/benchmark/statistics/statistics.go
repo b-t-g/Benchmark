@@ -13,7 +13,12 @@ type Statistics struct {
 
 type QueryStatistic struct {
 	QueryMsDuration int64
-	Query           string
+
+	// Include the whole query, instead of just the query params
+	// so users can compare results just by copy/pasting the query
+	// and run it themselves, instead of needing to construct the query
+	// manually from the parameters.
+	Query string
 }
 
 type ProcessedStatistics struct {
@@ -40,10 +45,10 @@ func ProcessQueryStatistics(stats Statistics) ProcessedStatistics {
 func standardDeviation(durations []int64, avg float64) float64 {
 	var sd float64
 	for _, i := range durations {
-		sd += math.Pow(float64(i) - avg, 2)
+		sd += math.Pow(float64(i)-avg, 2)
 	}
 
-	return math.Sqrt(sd/(float64(len(durations))))
+	return math.Sqrt(sd / (float64(len(durations))))
 }
 
 func average(durations []int64) float64 {
@@ -52,29 +57,28 @@ func average(durations []int64) float64 {
 		avg += i
 	}
 
-	return float64(avg)/float64(len(durations))
+	return float64(avg) / float64(len(durations))
 }
 
 // This is the simplest approach, and hence easiest to understand/change, but, in terms of time complexity, is not optimal.
 // If improving statistics calculation time could lead to an appreciably better experience, we have a few options:
 //
-// 1. Use a better algorithm, namely the "quickselect" algorithm with the (expected) complexity
-//    of O(N) where N is the length of the array.
+//  1. Use a better algorithm, namely the "quickselect" algorithm with the (expected) complexity
+//     of O(N) where N is the length of the array.
 //
-// 2. Keep the algorithms for calculating statistics largely the same, but amortize their calculation. I.e.,
-//    when sorting the array (e.g., using heapsort, which analyzes each element individually by "removing" each element
-//    from the heap), we could calculate the average at the same time. This would not lead to a runtime improvement in terms
-//    of computational complexity, but could be an appreciable improvement to a user when there are a sufficiently large number
-//    of queries.
+//  2. Keep the algorithms for calculating statistics largely the same, but amortize their calculation. I.e.,
+//     when sorting the array (e.g., using heapsort, which analyzes each element individually by "removing" each element
+//     from the heap), we could calculate the average at the same time. This would not lead to a runtime improvement in terms
+//     of computational complexity, but could be an appreciable improvement to a user when there are a sufficiently large number
+//     of queries.
 func median(durations []int64) float64 {
-	sort.Slice(durations, func(i,j int) bool {
+	sort.Slice(durations, func(i, j int) bool {
 		return durations[i] < durations[j]
 	})
 
-	if len(durations) % 2 == 1 {
-		return float64(durations[(len(durations) - 1)/2])
+	if len(durations)%2 == 1 {
+		return float64(durations[(len(durations)-1)/2])
 	}
 
-	return (float64(durations[(len(durations)/2) - 1]) + float64(durations[(len(durations)/2)]))/2
+	return (float64(durations[(len(durations)/2)-1]) + float64(durations[(len(durations)/2)])) / 2
 }
-

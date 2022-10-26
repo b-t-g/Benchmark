@@ -64,7 +64,7 @@ func average(sumOfDurations int64, lenDurations int) float64 {
 //
 //  2. Keep the algorithms for calculating statistics largely the same, but amortize their calculation. I.e.,
 //     when sorting the array (e.g., using heapsort, which analyzes each element individually by "removing" each element
-//     from the heap), we could calculate the average at the same time. This would not lead to a runtime improvement in terms
+//     from the heap), we could calculate the standard deviation at the same time. This would not lead to a runtime improvement in terms
 //     of computational complexity, but could be an appreciable improvement to a user when there are a sufficiently large number
 //     of queries.
 //

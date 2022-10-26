@@ -18,7 +18,7 @@ var benchmarkCmd = &cobra.Command{
 }
 
 func init() {
-	benchmarkCmd.PersistentFlags().IntVarP(&NumWorkers, "number-of-workers", "n", 4, "Number of concurrent workers for processing queries")
+	benchmarkCmd.PersistentFlags().IntVarP(&NumWorkers, "number-of-workers", "n", 4, "Optional: Number of concurrent workers for processing queries. Defaults to 4.")
 	benchmarkCmd.PersistentFlags().StringVarP(&QueryParamsPath, "query-params", "q", "", "Required: File from which to read to generate queries.")
 
 }

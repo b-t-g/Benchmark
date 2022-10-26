@@ -173,7 +173,7 @@ Standard Deviation in Query Time: %f ms
 		processedStatistics.StdDev)
 }
 
-func validateRow(row string) error {
+func ValidateRow(row string) error {
 	fields := strings.Split(row, ",")
 	layout := "2006-02-01 15:04:05"
 	_, err := time.Parse(layout, fields[1])

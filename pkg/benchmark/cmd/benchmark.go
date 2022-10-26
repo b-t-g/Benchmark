@@ -95,11 +95,6 @@ func benchmark(cmd *cobra.Command, args []string) {
 		fmt.Printf("Environment variable %s not found! Using standard string as the connection string: %s", connectionStringEnvName, connStr)
 	}
 
-	// In a Kubernetes environment, instead of hard-coding, I'd create a Kubernetes
-	// secret and, in both the stateful set for the database (if it's deployed myself)
-	// and the deployment for this benchmark tool, I'd use the secret as an environment
-	// variable as shown here:
-	// https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
 	ctx := context.Background()
 	pool, err := pgxpool.Connect(ctx, connStr)
 	if err != nil {
